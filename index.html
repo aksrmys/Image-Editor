@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Positioning Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        .editor {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .image-container {
+            position: relative;
+            width: 500px;
+            height: 889px; /* 1080x1920 oranına yakın */
+            overflow: hidden;
+            border: 1px solid #000;
+            margin-bottom: 20px;
+            background-color: #e9e9e9;
+            cursor: move;
+        }
+        .image-container img {
+            max-width: 100%;
+            transform-origin: center center;
+            position: absolute;
+        }
+        #background-image {
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        #overlay-image {
+            top: 50%;
+            left: 50%;
+            z-index: 2;
+            transform: translate(-50%, -50%);
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .controls label {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+        }
+        .controls input[type="range"] {
+            width: 300px;
+        }
+        .button-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor">
+        <h2>Image Positioning Editor</h2>
+        <button id="load-images">Load Images from API</button>
+        <div class="image-container" id="image-container">
+            <img id="background-image" src="" alt="Background Image">
+            <img id="overlay-image" class="overlay-image" src="" alt="Overlay Image">
+        </div>
+        <div class="controls">
+            <label>
+                Scale: 
+                <input type="range" id="scale" min="0.1" max="3" value="1" step="0.1">
+            </label>
+            <label>
+                Rotate: 
+                <input type="range" id="rotate" min="0" max="360" value="0" step="1">
+            </label>
+        </div>
+        <div class="button-group">
+            <button id="send-to-server">Send to Server</button>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
