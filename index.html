@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Positioning Editor</title>
+    <title>Image Positioning Demo</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -33,12 +33,8 @@
             background-color: #e9e9e9;
             cursor: move;
         }
-        .image-container img {
-            max-width: 100%;
-            transform-origin: center center;
-            position: absolute;
-        }
         #background-image {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
@@ -46,10 +42,11 @@
             z-index: 1;
         }
         #overlay-image {
+            position: absolute;
             top: 50%;
             left: 50%;
-            z-index: 2;
             transform: translate(-50%, -50%);
+            z-index: 2;
         }
         .controls {
             display: flex;
@@ -74,11 +71,10 @@
 </head>
 <body>
     <div class="editor">
-        <h2>Image Positioning Editor</h2>
-        <button id="load-images">Load Images from API</button>
+        <h2>Image Positioning Demo</h2>
         <div class="image-container" id="image-container">
             <img id="background-image" src="" alt="Background Image">
-            <img id="overlay-image" class="overlay-image" src="" alt="Overlay Image">
+            <img id="overlay-image" src="" alt="Overlay Image">
         </div>
         <div class="controls">
             <label>
@@ -91,9 +87,86 @@
             </label>
         </div>
         <div class="button-group">
-            <button id="send-to-server">Send to Server</button>
+            <button id="download">Download as PNG</button>
         </div>
     </div>
-    <script src="app.js"></script>
+    <script>
+        const bgImage = "/mnt/data/bg.png"; // Arka plan resmi dosya yolu
+        const overlayImage = "/mnt/data/human.png"; // İnsan resmi dosya yolu
+        
+        document.getElementById('background-image').src = bgImage;
+        document.getElementById('overlay-image').src = overlayImage;
+
+        const overlay = document.getElementById('overlay-image');
+        let isDragging = false;
+        let startX, startY, initialX, initialY;
+
+        // Ölçek ve döndürme işlemleri
+        document.getElementById('scale').addEventListener('input', applyTransformations);
+        document.getElementById('rotate').addEventListener('input', applyTransformations);
+
+        function applyTransformations() {
+            const scaleValue = document.getElementById('scale').value;
+            const rotateValue = document.getElementById('rotate').value;
+            overlay.style.transform = `translate(-50%, -50%) scale(${scaleValue}) rotate(${rotateValue}deg)`;
+        }
+
+        // Sürükleme işlemi
+        overlay.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            startX = e.clientX - overlay.offsetLeft;
+            startY = e.clientY - overlay.offsetTop;
+            initialX = overlay.offsetLeft;
+            initialY = overlay.offsetTop;
+            document.body.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            document.body.style.cursor = 'default';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                let dx = e.clientX - startX;
+                let dy = e.clientY - startY;
+                overlay.style.left = `${initialX + dx}px`;
+                overlay.style.top = `${initialY + dy}px`;
+            }
+        });
+
+        // PNG olarak indirme
+        document.getElementById('download').addEventListener('click', function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1080;
+            canvas.height = 1920;
+            const ctx = canvas.getContext('2d');
+            
+            const bg = new Image();
+            const human = new Image();
+            bg.src = bgImage;
+            human.src = overlayImage;
+            
+            bg.onload = () => {
+                ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+                
+                const scaleValue = document.getElementById('scale').value;
+                const rotateValue = document.getElementById('rotate').value;
+                const positionX = overlay.offsetLeft;
+                const positionY = overlay.offsetTop;
+
+                ctx.save();
+                ctx.translate(positionX + (overlay.width * scaleValue / 2), positionY + (overlay.height * scaleValue / 2));
+                ctx.rotate(rotateValue * Math.PI / 180);
+                ctx.drawImage(human, -human.width * scaleValue / 2, -human.height * scaleValue / 2, human.width * scaleValue, human.height * scaleValue);
+                ctx.restore();
+
+                const link = document.createElement('a');
+                link.download = 'positioned-image.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            };
+        });
+    </script>
 </body>
 </html>
